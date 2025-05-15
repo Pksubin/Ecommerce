@@ -320,6 +320,9 @@ from django.db.models import Q, Avg, Count
 from django.contrib.auth.decorators import login_required
 from .models import Product, Category, Wishlist, SearchHistory
 
+from django.db.models import Avg, Count, Q
+from .models import Product, Category, Wishlist, CartItem, SearchHistory
+
 def view_products(request):
     # Get base query for products with ratings
     base_query = Product.objects.all().annotate(
@@ -365,14 +368,22 @@ def view_products(request):
     wishlist = []
     if request.user.is_authenticated:
         wishlist = [w.product for w in Wishlist.objects.filter(user=request.user)]
-    
+
+    # ✅ Add cart count logic
+    cart = get_user_cart(request)
+    cart_items = CartItem.objects.filter(cart=cart)
+    cart_count = sum(item.quantity for item in cart_items)
+    request.session['cart_count'] = cart_count
+
     return render(request, 'view_products.html', {
         'products': products,
         'categories': categories,
         'wishlist': wishlist,
         'recommended_products': recommended_products,
         'search_query': search_query,
+        'cart_count': cart_count,  # Pass to template if needed
     })
+
 
 def get_recommended_products(request):
     """
@@ -527,10 +538,23 @@ def add_to_wishlist(request, product_id):
 
    
 
+from django.contrib.auth.decorators import login_required
+from .models import Wishlist, CartItem
+
 @login_required
 def wishlist_view(request):
     wishlist = Wishlist.objects.filter(user=request.user)
-    return render(request, 'wishlist.html', {'wishlist': wishlist})
+    
+    # ✅ Add cart count logic
+    cart = get_user_cart(request)
+    cart_items = CartItem.objects.filter(cart=cart)
+    cart_count = sum(item.quantity for item in cart_items)
+    request.session['cart_count'] = cart_count
+
+    return render(request, 'wishlist.html', {
+        'wishlist': wishlist,
+        'cart_count': cart_count,  # Optional: pass to template if needed
+    })
 
 
 # New view for the buy page (replaces the modal)

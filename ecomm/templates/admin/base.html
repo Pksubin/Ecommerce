@@ -17,7 +17,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* Color Palette Variables - Matching Category Management Page */
         :root {
@@ -76,7 +75,7 @@
         /* Sidebar Styling */
         .sidebar {
             position: fixed;
-            top: 62px; /* height of navbar */
+            top: 70px; /* height of navbar */
             left: 0;
             height: calc(100% - 62px);
             width: 250px;
@@ -269,6 +268,7 @@
         .user-info {
             display: flex;
             align-items: center;
+            cursor: pointer;
         }
 
         .user-avatar {
@@ -282,6 +282,10 @@
             margin-right: 10px;
             color: var(--primary);
             font-weight: bold;
+        }
+
+        .user-name {
+            color: white;
         }
 
         /* Page Header */
@@ -322,20 +326,15 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item dropdown">
-                        <!-- <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"> -->
+                        <!-- <a href="#" class="nav-link dropdown-toggle text-white" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> -->
                             <div class="user-info">
                                 <div class="user-avatar">
                                     {{ user.username|first|upper }}
                                 </div>
-                                <span class="d-none d-sm-inline text-white">{{ user.username }}</span>
+                                <span class="user-name">{{ user.username }}</span>
                             </div>
                         </a>
-                        <!-- <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                        </ul> -->
+                       
                     </li>
                 </ul>
             </div>
@@ -472,5 +471,3 @@
     <!-- Additional scripts for specific pages -->
     {% block scripts %}{% endblock %}
 </body>
-
-</html>
