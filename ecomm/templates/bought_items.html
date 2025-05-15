@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Bootstrap, Font & Styling -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+  :root {
+    --primary: #7c5295;
+    --primary-light: #9d74b5;
+    --primary-dark: #5e3978;
+    --secondary: #f8f0ff;
+    --accent: #ff99c8;
+    --text: #4a4a4a;
+    --light: #f9f5ff;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--light);
+    color: var(--text);
+  }
+
+  .purchased-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    animation: fadeInUp 0.7s ease-in-out;
+  }
+
+  .page-title {
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+  }
+
+  .page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 25%;
+    width: 50%;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-light), var(--accent));
+    border-radius: 2px;
+  }
+
+  .card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(124, 82, 149, 0.1);
+    transition: all 0.4s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(124, 82, 149, 0.2);
+  }
+
+  .card-img-top {
+    height: 220px;
+    object-fit: cover;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: var(--primary-dark);
+  }
+
+  .card-text {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .purchase-date {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .no-items {
+    text-align: center;
+    padding: 5rem 0;
+    color: var(--primary-light);
+    font-size: 1.3rem;
+  }
+
+  .rating-form select, .rating-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .rated {
+    font-size: 0.9rem;
+    color: green;
+  }
+
+  .already-rated {
+    font-size: 0.9rem;
+    color: #5e3978;
+  }
+</style>
+
+<div class="container purchased-section">
+  <div class="mb-4">
+    <a href="{% url 'view_products' %}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+  </div>
+
+  <h2 class="page-title">Purchased Items</h2>
+
+  <div class="row">
+    {% for item in purchases %}
+    <div class="col-md-4 mt-4">
+      <div class="card h-100">
+        {% if item.product.image %}
+          <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
+        {% else %}
+          <img src="{% static 'images/no-image.png' %}" class="card-img-top" alt="No Image">
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ item.product.name }}</h5>
+          <p class="card-text">Price: ₹{{ item.product.price }}</p>
+          <p class="purchase-date">Purchased on: {{ item.date_bought|date:"M d, Y" }}</p>
+          <p><strong>Status:</strong> 
+            {% if item.status == 'delivered' %}
+              <span class="badge bg-success">{{ item.status }}</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">{{ item.status }}</span>
+            {% endif %}
+          </p>
+
+          {% if not item.rating %}
+           <form method="POST" action="{% url 'submit_rating' item.product.id %}" class="rating-form mt-3">
+  {% csrf_token %}
+  <div class="mb-2">
+    <label class="form-label d-block mb-1">Rate this product:</label>
+    <div class="star-rating">
+      {% for i in "54321" %}
+        <input type="radio" id="star{{ i }}-{{ item.product.id }}" name="rating" value="{{ i }}" required>
+        <label for="star{{ i }}-{{ item.product.id }}" title="{{ i }} star{{ i|pluralize }}">
+          &#9733;
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mb-2">
+    <textarea name="review" class="form-control form-control-sm" rows="2" placeholder="Optional review..."></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-sm btn-primary">Submit Rating</button>
+</form>
+
+          {% else %}
+            <p class="already-rated mt-2">
+              <i class="fas fa-star text-warning"></i> You rated: {{ item.rating.rating }} star{{ item.rating.rating|pluralize }}
+            </p>
+            {% if item.rating.review %}
+              <p class="text-muted small">"{{ item.rating.review }}"</p>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="no-items">No items bought yet.</div>
+    {% endfor %}
+  </div>
+</div>
+<style>
+    .star-rating {
+  direction: rtl;
+  display: inline-flex;
+}
+
+.star-rating input[type="radio"] {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 1.5rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #f5b301;
+}
+
+</style>
+{% endblock %}
